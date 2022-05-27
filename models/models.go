@@ -1,32 +1,32 @@
 package models
 
-type Cliente struct {
-	ID        int    `json:"id"`
-	Nome      string `json:"nome"`
-	Documento string `json:"documento"`
-	Tipo      string `json:"tipo"`
-	Email     string `json:"email"`
-	Telefone  string `json:"telefone"`
+import "gorm.io/gorm"
+
+type Client struct {
+	gorm.Model
+	Name      string  `json:"name"`
+	Document  string  `json:"document"`
+	Type      string  `json:"type"`
+	Email     string  `json:"email"`
+	Telephone string  `json:"telephone"`
+	Account   Account `gorm:"ForeignKey:ClientId"`
 }
 
-type Conta struct {
-	ID         int     `json:"id"`
-	Numero     string  `json:"numero"`
-	Agencia    string  `json:"agencia"`
-	Saldo      float64 `json:"saldo"`
-	Cliente_id Cliente `json:"cliente_id"`
+type Account struct {
+	gorm.Model
+	Number             string        `json:"numero"`
+	Agency             string        `json:"agencia"`
+	Balance            float64       `json:"saldo"`
+	ClientId           uint          `json:"cliente_id"`
+	TransactionsOrigin []Transaction `gorm:"ForeignKey:OriginAccount"`
+	TransactionsTarget []Transaction `gorm:"ForeignKey:TargetAccount"`
 }
 
-type Movimentacao struct {
-	ID            int     `json:"id"`
-	Conta_origem  Conta   `json:"conta_origem"`
-	Conta_destino Conta   `json:"conta_destino"`
-	Valor         float64 `json:"valor"`
-	Taxa          float64 `json:"taxa"`
-	Tipo          string  `json:"tipo"`
-}
-
-type Deposito struct {
-	Numero_conta string  `json:"numero_conta"`
-	Valor        float64 `json:"valor"`
+type Transaction struct {
+	gorm.Model
+	OriginAccount uint    `json:"origin_account"`
+	TargetAccount uint    `json:"target_account"`
+	Amount        float64 `json:"amount"`
+	Rate          float64 `json:"rate"`
+	Type          string  `json:"type"`
 }

@@ -4,12 +4,12 @@ services:
     image: "postgres"
     environment:
       - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=root      
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=bank
     ports:
       - "5432:5432"
     volumes:
-      - ./migration/docker-database-initial.sql:/docker-entrypoint-initdb.d/docker-database-initial.sql   
+      - ./postgres-data:/var/lib/postgresql/data  
 
   pgadmin-compose:
     image: dpage/pgadmin4
@@ -17,6 +17,6 @@ services:
       PGADMIN_DEFAULT_EMAIL: "email@email.com"
       PGADMIN_DEFAULT_PASSWORD: "123456"
     ports:
-      - "12345:80"
+      - "54321:80"
     depends_on:
       - postgres

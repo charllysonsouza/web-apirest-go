@@ -1,36 +1,32 @@
 package database
 
 import (
+	"fmt"
 	"log"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var (
-	DB  *gorm.DB
-	err error
+var DB *gorm.DB
+
+const (
+	USER   = "root"
+	PASS   = "admin"
+	HOST   = "localhost"
+	PORT   = 5432
+	DBNAME = "bank"
 )
 
-func ConectaComBancoDeDados() {
-	stringDeConexao := "host=localhost user=root password=root dbname=root port=5432 sslmode=disable"
-	DB, err = gorm.Open(postgres.Open(stringDeConexao))
+func StartDB() {
+	strConn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", HOST, USER, PASS, DBNAME, PORT)
+	database, err := gorm.Open(postgres.Open(strConn))
 	if err != nil {
 		log.Panic("Error connecting to database")
 	}
+	DB = database
 }
 
-// var db *sql.DB
-
-// func StartDB() {
-// 	database, err := sql.Open("mysql", "root:admin@/banco")
-
-// 	if err != nil {
-// 		log.Panic("Erro ao conectar com o banco de dados")
-// 	}
-// 	db = database
-// }
-
-// func GetDatabase() *sql.DB {
-// 	return db
-// }
+func GetDatabase() *gorm.DB {
+	return DB
+}
