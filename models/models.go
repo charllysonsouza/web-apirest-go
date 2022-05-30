@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Client struct {
 	gorm.Model
@@ -14,19 +18,28 @@ type Client struct {
 
 type Account struct {
 	gorm.Model
-	Number             string        `json:"numero"`
-	Agency             string        `json:"agencia"`
-	Balance            float64       `json:"saldo"`
-	ClientId           uint          `json:"cliente_id"`
+	Number             string        `gorm:"unique" json:"number"`
+	Agency             string        `json:"agency"`
+	Balance            int           `json:"balance"`
+	ClientId           uint          `json:"client_id"`
 	TransactionsOrigin []Transaction `gorm:"ForeignKey:OriginAccount"`
 	TransactionsTarget []Transaction `gorm:"ForeignKey:TargetAccount"`
 }
 
 type Transaction struct {
-	gorm.Model
-	OriginAccount uint    `json:"origin_account"`
-	TargetAccount uint    `json:"target_account"`
-	Amount        float64 `json:"amount"`
-	Rate          float64 `json:"rate"`
-	Type          string  `json:"type"`
+	ID            uint   `json:"id"`
+	OriginAccount uint   `json:"origin_account"`
+	TargetAccount uint   `gorm:"Default:null" json:"target_account"`
+	Amount        int    `json:"amount"`
+	Rate          int    `json:"rate"`
+	Type          string `json:"type"`
+	CreatedAt     time.Time
+}
+
+func (a *Account) Deposit(amount int) {
+	a.Balance += amount
+}
+
+func (a *Account) Withdraw(amount int) {
+	a.Balance -= amount
 }
