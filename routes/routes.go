@@ -9,12 +9,10 @@ import (
 func HandleRequests() {
 	router := gin.Default()
 
-	router.GET("/client/:id", controllers.GetById)
-	router.POST("/client", controllers.NewCliente)
-	router.POST("/account/:id", controllers.NewAccount)
-	router.PUT("/deposit", controllers.Deposit)
-	router.GET("/account/:id", controllers.GetAccountById)
-	router.PUT("/withdraw", controllers.WithDraw)
+	router.POST("/create-client", controllers.NewCliente)
+	router.POST("/create-account/:id", controllers.NewAccount)
+	router.POST("/deposit", controllers.Deposit)
+	router.POST("/withdraw", controllers.WithDraw)
 	router.POST("/transfer", controllers.Transfer)
 	router.GET("/extract", controllers.GetExtract)
 	router.Run()

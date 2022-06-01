@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"web-apirest-go/database"
 	"web-apirest-go/models"
@@ -13,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const withDrawRate = 400
-const transferRate = 100
+const withDrawFee = 400
+const transferFee = 100
 
 func Deposit(c *gin.Context) {
 	var deposit requests.DepositRequest
@@ -40,23 +40,20 @@ func Deposit(c *gin.Context) {
 	}
 
 	amountInCents := utils.ConvertToCents(deposit.Amount)
-	fmt.Println(amountInCents)
-	tax := amountInCents / 100
-	fmt.Println(tax)
+	tax := int(math.RoundToEven(float64(amountInCents) * 0.01))
 	valueToDeposit := amountInCents - tax
-	fmt.Println(valueToDeposit)
 
 	account.Deposit(valueToDeposit)
 
 	err = db.Save(&account).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "could not make the deposit"})
+		log.Fatal("cannot make deposit")
 		return
 	}
 
-	err = RegisterDeposit(account.ID, tax, valueToDeposit)
+	err = RegisterDeposit(account.ID, tax, amountInCents)
 	if err != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"error": "cannot possible register transaction"})
+		log.Fatal("cannot register deposit")
 		return
 	}
 
@@ -87,12 +84,12 @@ func WithDraw(c *gin.Context) {
 	}
 
 	amountInCents := utils.ConvertToCents(withdraw.Amount)
-	if (amountInCents + withDrawRate) > account.Balance {
+	if (amountInCents + withDrawFee) > account.Balance {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "there is not enough money to withdraw"})
 		return
 	}
 
-	account.Withdraw(amountInCents + withDrawRate)
+	account.Withdraw(amountInCents + withDrawFee)
 
 	db.Save(&account)
 	RegisterWithdraw(account.ID, amountInCents)
@@ -131,12 +128,12 @@ func Transfer(c *gin.Context) {
 	}
 
 	amountInCents := utils.ConvertToCents(transfer.Amount)
-	if (amountInCents + transferRate) > originAccount.Balance {
+	if (amountInCents + transferFee) > originAccount.Balance {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "there is not enough money to withdraw"})
 		return
 	}
 
-	originAccount.Withdraw(amountInCents + transferRate)
+	originAccount.Withdraw(amountInCents + transferFee)
 	targetAccount.Deposit(amountInCents)
 
 	db.Save(&originAccount)
@@ -144,7 +141,7 @@ func Transfer(c *gin.Context) {
 
 	err = RegisterTransfer(originAccount.ID, targetAccount.ID, amountInCents)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "cannot possible register transaction"})
+		log.Fatal("cannot possible register transaction")
 		return
 	}
 
@@ -152,8 +149,9 @@ func Transfer(c *gin.Context) {
 }
 
 func GetExtract(c *gin.Context) {
+	var originTransactions []models.Transaction
+	var destinationTransactions []models.Transaction
 	var request requests.Extract
-	var transactions []models.Transaction
 	var account models.Account
 	var response responses.TransferResponse
 
@@ -170,25 +168,44 @@ func GetExtract(c *gin.Context) {
 		return
 	}
 
-	err = db.Where("origin_account = ?", account.ID).Find(&transactions).Error
+	err = db.Where("origin_account = ?", account.ID).Find(&originTransactions).Error
 	if err != nil {
 		log.Fatal("cannot find transactions: " + err.Error())
 	}
 
+	err = db.Where("target_account = ?", account.ID).Find(&destinationTransactions).Error
+	if err != nil {
+		log.Fatal("cannot find transactions: " + err.Error())
+	}
+
+	var extractInfo responses.ExtractInfo
+
 	response.Number = account.Number
 	response.Agency = account.Agency
-	response.Balance = float64(account.Balance)
+	response.Balance = float64(account.Balance) / 100.00
 
-	for _, transaction := range transactions {
-		var extractLine responses.ExtractInfo
-		extractLine.Id = transaction.ID
+	for _, transaction := range originTransactions {
+		var extractLine responses.ExtractLine
+		extractLine.TransactionId = transaction.TransactionId
 		extractLine.Type = transaction.Type
-		extractLine.Rate = float64(transaction.Rate) / 100
-		extractLine.Value = float64(transaction.Amount) / 100
+		extractLine.Fee = float64(transaction.Fee) / 100.00
+		extractLine.Value = float64(transaction.Amount) / 100.00
 		extractLine.Date = transaction.CreatedAt
 
-		response.Transactions = append(response.Transactions, extractLine)
+		extractInfo.TransactionsAsOrigin = append(extractInfo.TransactionsAsOrigin, extractLine)
 	}
+
+	for _, transaction := range destinationTransactions {
+		var extractLine responses.ExtractLineDestiny
+		extractLine.TransactionId = transaction.TransactionId
+		extractLine.Type = transaction.Type
+		extractLine.Value = float64(transaction.Amount) / 100.00
+		extractLine.Date = transaction.CreatedAt
+
+		extractInfo.TransactionsAsDestination = append(extractInfo.TransactionsAsDestination, extractLine)
+	}
+
+	response.Transactions = append(response.Transactions, extractInfo)
 
 	c.JSON(http.StatusOK, response)
 }

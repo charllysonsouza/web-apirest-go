@@ -19,7 +19,7 @@ const (
 )
 
 func StartDB() {
-	strConn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", HOST, USER, PASS, DBNAME, PORT)
+	strConn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=America/Sao_Paulo", HOST, USER, PASS, DBNAME, PORT)
 	database, err := gorm.Open(postgres.Open(strConn))
 	if err != nil {
 		log.Panic("Error connecting to database")

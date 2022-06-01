@@ -27,11 +27,11 @@ type Account struct {
 }
 
 type Transaction struct {
-	ID            uint   `json:"id"`
+	TransactionId string `json:"transactionId"`
 	OriginAccount uint   `json:"origin_account"`
 	TargetAccount uint   `gorm:"Default:null" json:"target_account"`
 	Amount        int    `json:"amount"`
-	Rate          int    `json:"rate"`
+	Fee           int    `json:"fee"`
 	Type          string `json:"type"`
 	CreatedAt     time.Time
 }
@@ -42,4 +42,12 @@ func (a *Account) Deposit(amount int) {
 
 func (a *Account) Withdraw(amount int) {
 	a.Balance -= amount
+}
+
+func (client *Client) FillType() {
+	if len(client.Document) == 11 {
+		client.Type = "PessoaFisica"
+	} else {
+		client.Type = "PessoaJuridica"
+	}
 }
