@@ -129,9 +129,9 @@ Para emitir um extrato com todas as movimentações basta enviar uma *requisiç�
 O endpoint deve retornar uma *response* com os seguintes dados 
 ```json
 {
-	"accountNumber": "64066",
-	"agencyNumber": "1212",
-	"balance": 50,
+	"accountNumber": string,
+	"agencyNumber": string,
+	"balance": number,
 	"transactions": [
 		{
 			"transactionsAsOrigin": [
