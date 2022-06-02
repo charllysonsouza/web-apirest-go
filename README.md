@@ -1,4 +1,4 @@
-<h1 align="center">Bank Account API</h1>
+<h1 align="center">Bank Account API</h1>  
 
 ### Aplicação criada com intuito de simular operações básicas a se realizar com uma conta bancária, como: depósito, saque e transferência.
 
@@ -8,7 +8,11 @@ As sequintes restrições foram estabelecidas ao realizar as operações:
 - Saque: R$ 4,00 sobre o valor do saque 
 - Transferência: R$ 1,00 
 
-
+## Ferramentas utilizadas
+- `gin-gonic`
+- `gorm-io`
+- `postgresSQL`
+          
 ## Banco de dados
 A seguinte modelagem de dados foi realizada para guardar as informações que necessitamos persistir.
 <p align="center">
