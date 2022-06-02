@@ -12,6 +12,7 @@ As sequintes restrições foram estabelecidas ao realizar as operações:
 - `gin-gonic`
 - `gorm-io`
 - `postgresSQL`
+- `pgAdmin4`
           
 ## Banco de dados
 A seguinte modelagem de dados foi realizada para guardar as informações que necessitamos persistir.
