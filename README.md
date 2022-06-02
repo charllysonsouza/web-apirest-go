@@ -11,7 +11,7 @@ As sequintes restrições foram estabelecidas ao realizar as operações:
 ## Ferramentas utilizadas
 - `gin-gonic`
 - `gorm-io`
-- `postgresSQL`
+- `postgreSQL`
 - `pgAdmin4`
           
 ## Banco de dados
